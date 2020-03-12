@@ -6,6 +6,8 @@ import math
 # dimensions
 display_width = 800
 display_height = 800
+person_width = 10
+person_height = 20
 
 # color definitions
 black = (0, 0, 0)
@@ -41,20 +43,18 @@ class Patient:
     def __init__(self, pos, infected):
         self.pos = pos
         self.infected = infected
-        self.w = 10
-        self.h = 20
 
     def is_hit(self, axis, n):
         if axis == 'x':
-            if self.pos.x <= n <= self.pos.x + self.w:
+            if self.pos.x <= n <= self.pos.x + person_width:
                 return True
         elif axis == 'y':
-            if self.pos.y <= n <= self.pos.y + self.h:
+            if self.pos.y <= n <= self.pos.y + person_height:
                 return True
         return False
 
     def out_of_bounds(self):
-        if self.is_hit('x', 0) or self.is_hit('x', 800) or self.is_hit('y', 0) or self.is_hit('x', 800):
+        if self.is_hit('x', 0) or self.is_hit('x', display_width) or self.is_hit('y', 0) or self.is_hit('y', display_height):
             return True
         return False
 
@@ -64,18 +64,19 @@ class Patient:
         else:
             color = healthy_color
         pygame.draw.rect(game_display, color,
-                         [self.pos.x, self.pos.y, self.w, self.h])
+                         [self.pos.x, self.pos.y, person_width, person_height])
 
 
 # TODO: NPC and Player inherits from the player superclass
 class Npc(Patient):
-    def __init__(self, pos, infected):
+    def __init__(self, infected):
+        pos = Vector(
+            random.randrange(0, display_width - person_width),
+            random.randrange(0, display_height - person_height)
+        )
         Patient.__init__(self, pos, infected)
-        self.gen_vel()
-
-    def gen_vel(self):
-        self.vel = Vector(random.randrange(0, 200),
-                          random.randrange(0, 200))
+        self.vel = Vector(random.randrange(-200, 200),
+                          random.randrange(-200, 200))
         self.vel.normalize()
         scal = random.randrange(5, 20) / 10
         self.vel.x *= scal
@@ -88,9 +89,13 @@ class Npc(Patient):
             self.vel.y = -self.vel.y
 
     def move(self):
-        self.bounce()
         self.pos.x += self.vel.x
         self.pos.y += self.vel.y
+
+    def animate(self):
+        self.bounce()
+        self.move()
+        self.draw()
 
 
 # functions
@@ -100,15 +105,21 @@ def quit_game():
 
 
 def game_loop():
-    test_npc = Npc(Vector(display_width/2, display_height/2), False)
+    population = []
+    for i in range(0, 50):
+        population.append(Npc(False))
+    joe = Npc(True)
+
     game_exit = False
     while not game_exit:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 quit_game()
         game_display.fill(black)
-        test_npc.move()
-        test_npc.draw()
+        for npc in population:
+            npc.animate()
+        joe.animate()
+
         pygame.display.flip()
         clock.tick(120)
 
