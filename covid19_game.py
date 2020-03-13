@@ -6,9 +6,7 @@ import math
 # dimensions
 display_width = 1200
 display_height = 1200
-'''person_width = 15
-person_height = 20'''
-population = 200
+population = 150
 
 # color definitions
 black = (0, 0, 0)
@@ -57,23 +55,16 @@ class Patient:
         self.infected = infected
 
     def is_hit(self, pos, radius):
-        '''if axis == 'x':
-            if self.pos.x <= n <= self.pos.x + person_width:
-                return True
-        elif axis == 'y':
-            if self.pos.y <= n <= self.pos.y + person_height:
-                return True'''
         if (self.pos - pos).v < self.radius + radius:
             return True
         return False
 
     def out_of_bounds(self):
-        '''if self.is_hit('x', 0) or self.is_hit('x', display_width) or self.is_hit('y', 0) or self.is_hit('y', display_height):'''
         if self.pos.x < self.radius or self.pos.x > display_width - self.radius or self.pos.y < self.radius or self.pos.y > display_height - self.radius:
             return True
         return False
 
-    def is_infected(self):
+    def test_for_infection(self):
         for infected_patient in infected_people:
             if self.is_hit(infected_patient.pos, infected_patient.radius):
                 self.infected = True
@@ -119,35 +110,33 @@ class Npc(Patient):
 
     def animate(self):
         if not self.infected:
-            self.is_infected()
+            self.test_for_infection()
         self.bounce()
         self.move(self.vel.x, self.vel.y)
         self.draw()
 
 
-'''class Player(Patient):
-    def __init__(self, pos, controls, infected):
-        Patient.__init__(self, pos, infected)
+class Player(Patient):
+    def __init__(self, pos, radius, infected, controls):
+        Patient.__init__(self, pos, radius, infected)
         self.controls = controls
 
     def animate(self):
         key_pressed = pygame.key.get_pressed()
         if not self.infected:
-            self.is_infected()
-        if key_pressed[self.controls[0]] and self.pos.x > 0:
+            self.test_for_infection()
+        if key_pressed[self.controls[0]] and self.pos.x > self.radius:
             self.move(-2, 0)
-        if key_pressed[self.controls[1]] and self.pos.x < display_width - person_width:
+        if key_pressed[self.controls[1]] and self.pos.x < display_width - self.radius:
             self.move(2, 0)
-        if key_pressed[self.controls[2]] and self.pos.y > 0:
+        if key_pressed[self.controls[2]] and self.pos.y > self.radius:
             self.move(0, -2)
-        if key_pressed[self.controls[3]] and self.pos.y < display_height - person_height:
+        if key_pressed[self.controls[3]] and self.pos.y < display_height - self.radius:
             self.move(0, 2)
         self.draw(infected_color=yellow, healthy_color=teal)
-'''
+
 
 # functions
-
-
 def quit_game():
     pygame.quit()
     quit()
@@ -158,9 +147,14 @@ def game_loop():
     for i in range(0, population):
         people.append(Npc(10, False))
 
-    '''player = Player(Vector(display_width/2 - person_width/2, display_height/2 - person_height/2), [pygame.K_LEFT, pygame.K_RIGHT,
-                                                                                                   pygame.K_UP, pygame.K_DOWN], False)
-    people.append(player)'''
+    player = Player(
+        Vector(int(display_width/2), int(display_height/2)),
+        5,
+        False,
+        [pygame.K_LEFT, pygame.K_RIGHT, pygame.K_UP, pygame.K_DOWN]
+    )
+
+    people.append(player)
     infected_people.append(Npc(10, True))
 
     game_exit = False
