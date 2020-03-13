@@ -6,7 +6,7 @@ import math
 # dimensions
 display_width = 800
 display_height = 800
-person_width = 10
+person_width = 15
 person_height = 20
 
 # color definitions
@@ -21,6 +21,8 @@ bright_green = (0, 255, 0)
 game_display = pygame.display.set_mode((display_width, display_height))
 clock = pygame.time.Clock()
 game_exit = False
+people = []
+infected_people = []
 
 # setup
 pygame.init()
@@ -58,6 +60,18 @@ class Patient:
             return True
         return False
 
+    def is_infected(self):
+        for infected_patient in infected_people:
+            if (self.is_hit('x', infected_patient.pos.x) or
+                    self.is_hit('x', infected_patient.pos.x + person_width)):
+                if (self.is_hit('y', infected_patient.pos.y) or
+                        self.is_hit('y', infected_patient.pos.y + person_height)):
+                    self.infected = True
+                    people.remove(self)
+                    infected_people.append(self)
+                    return True
+        return False
+
     def draw(self, infected_color=bright_red, healthy_color=bright_green):
         if self.infected:
             color = infected_color
@@ -93,6 +107,8 @@ class Npc(Patient):
         self.pos.y += self.vel.y
 
     def animate(self):
+        if not self.infected:
+            self.is_infected()
         self.bounce()
         self.move()
         self.draw()
@@ -105,10 +121,10 @@ def quit_game():
 
 
 def game_loop():
-    population = []
-    for i in range(0, 50):
-        population.append(Npc(False))
-    joe = Npc(True)
+    for i in range(0, 200):
+        people.append(Npc(False))
+    # patient 0
+    infected_people.append(Npc(True))
 
     game_exit = False
     while not game_exit:
@@ -116,9 +132,10 @@ def game_loop():
             if event.type == pygame.QUIT:
                 quit_game()
         game_display.fill(black)
-        for npc in population:
+        for npc in people:
             npc.animate()
-        joe.animate()
+        for npc in infected_people:
+            npc.animate()
 
         pygame.display.flip()
         clock.tick(120)
