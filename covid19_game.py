@@ -4,10 +4,11 @@ import random
 import math
 
 # dimensions
-display_width = 800
-display_height = 800
+display_width = 1200
+display_height = 1200
 person_width = 15
 person_height = 20
+population = 200
 
 # color definitions
 black = (0, 0, 0)
@@ -16,6 +17,8 @@ red = (200, 0, 0)
 green = (0, 200, 0)
 bright_red = (255, 0, 0)
 bright_green = (0, 255, 0)
+teal = (0, 255, 255)
+yellow = (255, 255, 0)
 
 # global variables
 game_display = pygame.display.set_mode((display_width, display_height))
@@ -72,6 +75,10 @@ class Patient:
                     return True
         return False
 
+    def move(self, dx, dy):
+        self.pos.x += dx
+        self.pos.y += dy
+
     def draw(self, infected_color=bright_red, healthy_color=bright_green):
         if self.infected:
             color = infected_color
@@ -97,21 +104,37 @@ class Npc(Patient):
         self.vel.y *= scal
 
     def bounce(self):
-        if self.is_hit('x', 0) or self.is_hit('x', 800):
+        if self.is_hit('x', 0) or self.is_hit('x', display_width):
             self.vel.x = -self.vel.x
-        if self.is_hit('y', 0) or self.is_hit('y', 800):
+        if self.is_hit('y', 0) or self.is_hit('y', display_height):
             self.vel.y = -self.vel.y
-
-    def move(self):
-        self.pos.x += self.vel.x
-        self.pos.y += self.vel.y
 
     def animate(self):
         if not self.infected:
             self.is_infected()
         self.bounce()
-        self.move()
+        self.move(self.vel.x, self.vel.y)
         self.draw()
+
+
+class Player(Patient):
+    def __init__(self, pos, controls, infected):
+        Patient.__init__(self, pos, infected)
+        self.controls = controls
+
+    def animate(self):
+        key_pressed = pygame.key.get_pressed()
+        if not self.infected:
+            self.is_infected()
+        if key_pressed[self.controls[0]]:
+            self.move(-2, 0)
+        if key_pressed[self.controls[1]]:
+            self.move(2, 0)
+        if key_pressed[self.controls[2]]:
+            self.move(0, -2)
+        if key_pressed[self.controls[3]]:
+            self.move(0, 2)
+        self.draw(infected_color=yellow, healthy_color=teal)
 
 
 # functions
@@ -121,9 +144,13 @@ def quit_game():
 
 
 def game_loop():
-    for i in range(0, 200):
+    time.sleep(3)
+    for i in range(0, population):
         people.append(Npc(False))
     # patient 0
+    player = Player(Vector(display_width/2 - person_width/2, display_height/2 - person_height/2), [pygame.K_LEFT, pygame.K_RIGHT,
+                                                                                                   pygame.K_UP, pygame.K_DOWN], False)
+    people.append(player)
     infected_people.append(Npc(True))
 
     game_exit = False
@@ -131,6 +158,7 @@ def game_loop():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 quit_game()
+
         game_display.fill(black)
         for npc in people:
             npc.animate()
