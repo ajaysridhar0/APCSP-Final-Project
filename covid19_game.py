@@ -79,7 +79,7 @@ class Patient:
         self.pos.x += dx
         self.pos.y += dy
 
-    def draw(self, infected_color=bright_red, healthy_color=bright_green):
+    def draw(self, infected_color=red, healthy_color=green):
         if self.infected:
             color = infected_color
         else:
@@ -126,13 +126,13 @@ class Player(Patient):
         key_pressed = pygame.key.get_pressed()
         if not self.infected:
             self.is_infected()
-        if key_pressed[self.controls[0]]:
+        if key_pressed[self.controls[0]] and self.pos.x > 0:
             self.move(-2, 0)
-        if key_pressed[self.controls[1]]:
+        if key_pressed[self.controls[1]] and self.pos.x < display_width - person_width:
             self.move(2, 0)
-        if key_pressed[self.controls[2]]:
+        if key_pressed[self.controls[2]] and self.pos.y > 0:
             self.move(0, -2)
-        if key_pressed[self.controls[3]]:
+        if key_pressed[self.controls[3]] and self.pos.y < display_height - person_height:
             self.move(0, 2)
         self.draw(infected_color=yellow, healthy_color=teal)
 
@@ -147,7 +147,7 @@ def game_loop():
     time.sleep(3)
     for i in range(0, population):
         people.append(Npc(False))
-    # patient 0
+
     player = Player(Vector(display_width/2 - person_width/2, display_height/2 - person_height/2), [pygame.K_LEFT, pygame.K_RIGHT,
                                                                                                    pygame.K_UP, pygame.K_DOWN], False)
     people.append(player)
