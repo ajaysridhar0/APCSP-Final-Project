@@ -6,11 +6,13 @@ import math
 # dimensions
 display_width = 1200
 display_height = 1200
-population = 150
+population = 75
 
 # color definitions
 black = (0, 0, 0)
 white = (255, 255, 255)
+dark_red = (145, 0, 0)
+dark_green = (0, 145, 0)
 red = (200, 0, 0)
 green = (0, 200, 0)
 bright_red = (255, 0, 0)
@@ -48,6 +50,13 @@ class Vector:
         return Vector(self.x - other.x, self.y - other.y)
 
 
+class Virus:
+    def __init__(self, duration, spread_radius, death_rate):
+        self.duration = duration
+        self.spread_radius = spread_radius
+        self.death_rate = death_rate
+
+
 class Patient:
     def __init__(self, pos, radius, infected):
         self.pos = pos
@@ -77,7 +86,7 @@ class Patient:
         self.pos.x += dx
         self.pos.y += dy
 
-    def draw(self, infected_color=red, healthy_color=green):
+    def draw(self, healthy_color=green, infected_color=red):
         if self.infected:
             color = infected_color
         else:
@@ -117,9 +126,13 @@ class Npc(Patient):
 
 
 class Player(Patient):
-    def __init__(self, pos, radius, infected, controls):
+    def __init__(self, pos, radius, infected, healthy_color, infected_color, controls):
         Patient.__init__(self, pos, radius, infected)
         self.controls = controls
+        self.healthy_color = healthy_color
+        self.infected_color = infected_color
+        self.start_time = time.time()
+        self.age = 0
 
     def animate(self):
         key_pressed = pygame.key.get_pressed()
@@ -133,7 +146,17 @@ class Player(Patient):
             self.move(0, -2)
         if key_pressed[self.controls[3]] and self.pos.y < display_height - self.radius:
             self.move(0, 2)
-        self.draw(infected_color=yellow, healthy_color=teal)
+        self.draw(healthy_color=self.healthy_color, infected_color=self.infected_color)
+
+    def time_survived(self):
+        if not self.infected:
+            self.age = time.time() - self.start_time
+        formatted_time = f"{self.age:.1f}"
+        score_time = float(formatted_time)
+        font = pygame.font.SysFont(None, 50)
+        text = font.render("Time alive: " + str(score_time), True, white)
+        game_display.blit(text, (10, 10))
+        return score_time
 
 
 # functions
@@ -145,17 +168,17 @@ def quit_game():
 def game_loop():
     # time.sleep(3)
     for i in range(0, population):
-        people.append(Npc(10, False))
-
+        people.append(Npc(15, False))
     player = Player(
         Vector(int(display_width/2), int(display_height/2)),
-        5,
+        15,
         False,
+        teal,
+        yellow,
         [pygame.K_LEFT, pygame.K_RIGHT, pygame.K_UP, pygame.K_DOWN]
     )
-
     people.append(player)
-    infected_people.append(Npc(10, True))
+    infected_people.append(Npc(15, True))
 
     game_exit = False
     while not game_exit:
@@ -168,7 +191,7 @@ def game_loop():
             npc.animate()
         for npc in infected_people:
             npc.animate()
-
+        player.time_survived()
         pygame.display.flip()
         clock.tick(120)
 
