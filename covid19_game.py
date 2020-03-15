@@ -58,7 +58,7 @@ class Virus:
         self.start_time = time.time()
         self.duration = random.randrange(5, 6 + level)
         self.radius = random.randrange(15, 16 + level)
-        self.color = (random.randrange(0, 255), random.randrange(0, 255),
+        self.color = (random.randrange(0, 255), 0,
                       random.randrange(0, 255))
         # self.death_rate = death_rate
 
@@ -105,6 +105,10 @@ class Patient:
         self.healthy_color = healthy_color
         self.immune = False
         self.virus = virus
+        if self.virus is not None:
+            self.virus_carrier = True
+        else:
+            self.virus_carrier = False
 
     def is_hit(self, pos, radius):
         if (self.pos - pos).v < self.radius + radius:
@@ -164,13 +168,13 @@ class Npc(Patient):
             random.randrange(self.radius, display_width - self.radius),
             random.randrange(self.radius, display_height - self.radius)
         )
+
         self.vel = Vector(random.randrange(-200, 200),
                           random.randrange(-200, 200))
         self.vel.normalize()
         scal = random.randrange(5, 20) / 10
         self.vel.x *= scal
         self.vel.y *= scal
-        '''self.tick = 0'''
 
     def bounce(self):
         if self.pos.x < self.radius or self.pos.x > display_width - self.radius:
@@ -231,7 +235,7 @@ def model_loop():
 
 
 def game_loop():
-    # time.sleep(3)
+    global virus_level
     for i in range(0, population):
         people.append(Npc(15))
     player = Player(
@@ -241,7 +245,7 @@ def game_loop():
         [pygame.K_LEFT, pygame.K_RIGHT, pygame.K_UP, pygame.K_DOWN]
     )
     people.append(player)
-    infected_people.append(Npc(15, virus=Virus(50)))
+    infected_people.append(Npc(15, virus=Virus(virus_level)))
 
     game_exit = False
     while not game_exit:
@@ -250,6 +254,18 @@ def game_loop():
                 quit_game()
 
         game_display.fill(black)
+
+        if len(infected_people) == 0:
+            virus_level += 5
+            for patient in immune_people:
+                patient.immune = False
+                if patient.virus_carrier:
+                    patient.virus = Virus(virus_level)
+                    infected_people.append(patient)
+                else:
+                    people.append(patient)
+            del immune_people[:]
+
         for patient in people:
             patient.animate()
         for patient in infected_people:
