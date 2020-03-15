@@ -6,7 +6,7 @@ import math
 # dimensions
 display_width = 1200
 display_height = 1200
-population = 100
+population = 75
 
 # color definitions
 black = (0, 0, 0)
@@ -56,8 +56,8 @@ class Virus:
     def __init__(self, level):
         self.level = level
         self.start_time = time.time()
-        self.duration = random.randrange(5, 6 + level)
-        self.radius = random.randrange(15, 16 + level)
+        self.duration = random.randrange(5 + int(level * 0.2), 6 + level)
+        self.radius = random.randrange(15 + int(level * 0.6), 16 + level)
         self.color = (random.randrange(0, 255), 0,
                       random.randrange(0, 255))
         # self.death_rate = death_rate
@@ -218,6 +218,12 @@ class Player(Patient):
 
 
 # functions
+def display_mutation_level():
+    font = pygame.font.SysFont(None, 50)
+    text = font.render("Mutation level: " + str(virus_level), True, white)
+    game_display.blit(text, (10, 70))
+
+
 def quit_game():
     pygame.quit()
     quit()
@@ -235,7 +241,9 @@ def model_loop():
 
 
 def game_loop():
+    time.sleep(3)
     global virus_level
+    global immune_people
     for i in range(0, population):
         people.append(Npc(15))
     player = Player(
@@ -256,7 +264,7 @@ def game_loop():
         game_display.fill(black)
 
         if len(infected_people) == 0:
-            virus_level += 5
+            virus_level += 10
             for patient in immune_people:
                 patient.immune = False
                 if patient.virus_carrier:
@@ -264,7 +272,7 @@ def game_loop():
                     infected_people.append(patient)
                 else:
                     people.append(patient)
-            del immune_people[:]
+            immune_people = []
 
         for patient in people:
             patient.animate()
@@ -273,6 +281,7 @@ def game_loop():
         for patient in immune_people:
             patient.animate()
         player.time_survived()
+        display_mutation_level()
         pygame.display.flip()
         clock.tick(120)
 
