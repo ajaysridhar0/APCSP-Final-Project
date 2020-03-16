@@ -206,6 +206,7 @@ class Player(Patient):
         self.controls = controls
         self.start_time = time.time()
         self.has_been_infected = False
+        self.age = 0
 
     def animate(self):
         key_pressed = pygame.key.get_pressed()
@@ -233,8 +234,8 @@ class Player(Patient):
                     pygame.quit()
                     quit()
             # game_display.fill(white)
-            '''button("Play Again", 150, 450, 100, 50, bright_green, green, game_loop)
-            button("Quit", 550, 450, 100, 50, bright_red, red, quit_game)'''
+            button("Play Again", 175, 650, 200, 100, bright_green, green, game_loop)
+            button("Quit", 625, 650, 200, 100, bright_red, red, quit_game)
 
             pygame.display.update()
             clock.tick(120)
@@ -249,14 +250,30 @@ class Player(Patient):
         font = pygame.font.SysFont(None, 50)
         time_text = font.render("Time uninfected: " + str(score_time), True, white)
         game_display.blit(time_text, (10, 10))
-        mutation_text = font.render("Mutation level: " + str(int(virus_level/10)), True, white)
+        mutation_text = font.render("Number of mutations: " + str(int(virus_level/5)), True, white)
         game_display.blit(mutation_text, (10, 70))
 
 
 # functions
-def text_objects(text, font):
-    text_surface = font.render(text, True, white)
+def text_objects(text, font, color=white):
+    text_surface = font.render(text, True, color)
     return text_surface, text_surface.get_rect()
+
+
+def button(msg, x, y, w, h, ic, ac, action=None):
+    mouse = pygame.mouse.get_pos()
+    click = pygame.mouse.get_pressed()
+    if x + w > mouse[0] > x and y + h > mouse[1] > y:
+        pygame.draw.rect(game_display, ac, (x, y, w, h))
+        if click[0] == 1 and action is not None:
+            action()
+    else:
+        pygame.draw.rect(game_display, ic, (x, y, w, h))
+
+    small_text = pygame.font.SysFont(None, 50)
+    text_surf, text_rect = text_objects(msg, small_text, color=black)
+    text_rect.center = ((x + (w / 2)), (y + (h / 2)))
+    game_display.blit(text_surf, text_rect)
 
 
 def quit_game():
@@ -278,6 +295,11 @@ def model_loop():
 def game_loop():
     global virus_level
     global immune_people
+
+    del people[:]
+    del infected_people[:]
+    del immune_people[:]
+
     for i in range(0, population):
         people.append(Npc())
     player = Player(
