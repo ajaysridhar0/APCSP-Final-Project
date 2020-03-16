@@ -223,7 +223,7 @@ class Player(Patient):
     def is_game_over(self):
         if not self.has_been_infected:
             return
-        large_text = pygame.font.SysFont(None, 115)
+        large_text = pygame.font.SysFont('calibri', 115)
         text_surf, text_rect = text_objects("You were infected", large_text)
         text_rect.center = (display_width/2, display_height/2)
         game_display.blit(text_surf, text_rect)
@@ -234,7 +234,7 @@ class Player(Patient):
                     pygame.quit()
                     quit()
             # game_display.fill(white)
-            button("Play Again", 175, 650, 200, 100, bright_green, green, game_loop)
+            button("Restart", 175, 650, 200, 100, bright_green, green, game_loop)
             button("Quit", 625, 650, 200, 100, bright_red, red, quit_game)
 
             pygame.display.update()
@@ -245,12 +245,12 @@ class Player(Patient):
             self.age = time.time() - self.start_time
         else:
             self.has_been_infected = True
-        formatted_time = f"{self.age:.1f}"
-        score_time = float(formatted_time)
-        font = pygame.font.SysFont(None, 50)
-        time_text = font.render("Time uninfected: " + str(score_time), True, white)
-        game_display.blit(time_text, (10, 10))
-        mutation_text = font.render("Number of mutations: " + str(int(virus_level/5)), True, white)
+        font = pygame.font.SysFont('calibri bold', 40)
+        score_text = font.render("Time uninfected: " +
+                                 str(float(f"{self.age:.1f}")), True, white)
+        game_display.blit(score_text, (10, 10))
+        mutation_text = font.render(
+            "Number of mutations: " + str(int(virus_level/5)), True, white)
         game_display.blit(mutation_text, (10, 70))
 
 
@@ -270,7 +270,7 @@ def button(msg, x, y, w, h, ic, ac, action=None):
     else:
         pygame.draw.rect(game_display, ic, (x, y, w, h))
 
-    small_text = pygame.font.SysFont(None, 50)
+    small_text = pygame.font.SysFont('calibri', 50)
     text_surf, text_rect = text_objects(msg, small_text, color=black)
     text_rect.center = ((x + (w / 2)), (y + (h / 2)))
     game_display.blit(text_surf, text_rect)
@@ -288,7 +288,7 @@ def game_intro():
             if event.type == pygame.QUIT:
                 quit_game()
             game_display.fill(black)
-            large_text = pygame.font.SysFont(None, 115)
+            large_text = pygame.font.SysFont('calibri', 100)
             text_surf, text_rect = text_objects("Project COVID19 (Beta)", large_text)
             text_rect.center = (display_width/2, display_height/2)
             game_display.blit(text_surf, text_rect)
