@@ -281,15 +281,28 @@ def quit_game():
     quit()
 
 
-'''# TODO: Create intro screen to pick gamemode
+# TODO: Create intro screen to pick gamemode
 def game_intro():
-    pass
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                quit_game()
+            game_display.fill(black)
+            large_text = pygame.font.SysFont(None, 115)
+            text_surf, text_rect = text_objects("Project COVID19 (Beta)", large_text)
+            text_rect.center = (display_width/2, display_height/2)
+            game_display.blit(text_surf, text_rect)
+
+            button("Play", 175, 650, 200, 100, bright_green, green, game_loop)
+            button("Quit", 625, 650, 200, 100, bright_red, red, quit_game)
+
+            pygame.display.update()
+            clock.tick(15)
 
 
-# TODO: Create model with adjustable variables
+'''# TODO: Create model with adjustable variables
 def model_loop():
-    pass
-'''
+    pass'''
 
 
 def game_loop():
@@ -341,5 +354,4 @@ def game_loop():
         clock.tick(120)
 
 
-game_loop()
-quit_game()
+game_intro()
