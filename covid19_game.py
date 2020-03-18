@@ -1,3 +1,4 @@
+import sys
 import pygame
 import time
 import random
@@ -232,7 +233,7 @@ class Player(Patient):
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
-                    quit()
+                    sys.exit()
             # game_display.fill(white)
             button("Restart", 175, 650, 200, 100, bright_green, green, game_loop)
             button("Quit", 625, 650, 200, 100, bright_red, red, quit_game)
@@ -247,7 +248,7 @@ class Player(Patient):
             self.has_been_infected = True
         font = pygame.font.SysFont('calibri bold', 40)
         score_text = font.render("Time uninfected: " +
-                                 str(float(f"{self.age:.1f}")), True, white)
+                                 str(round(self.age, 1)), True, white)
         game_display.blit(score_text, (10, 10))
         mutation_text = font.render(
             "Number of mutations: " + str(int(virus_level/5)), True, white)
@@ -278,7 +279,7 @@ def button(msg, x, y, w, h, ic, ac, action=None):
 
 def quit_game():
     pygame.quit()
-    quit()
+    sys.exit()
 
 
 # TODO: Create intro screen to pick gamemode
