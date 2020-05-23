@@ -21,7 +21,9 @@ teal = (0, 255, 255)
 yellow = (255, 255, 0)
 
 # global variables
-game_display = pygame.display.set_mode((display_width, display_height))
+game_display = pygame.display.set_mode((display_width, display_height),
+                                       pygame.HWSURFACE | pygame.DOUBLEBUF |
+                                       pygame.RESIZABLE)
 clock = pygame.time.Clock()
 population = 75
 virus_level = 0
@@ -34,6 +36,8 @@ immune_people = []
 # setup
 pygame.init()
 pygame.display.set_caption("Project COVID19")
+coronaImg = pygame.image.load('corona.png')
+pygame.display.set_icon(coronaImg)
 
 
 # classes
@@ -307,12 +311,15 @@ def model_loop():
 
 
 def game_loop():
+    global display_width
+    global display_height
     global virus_level
     global immune_people
 
     del people[:]
     del infected_people[:]
     del immune_people[:]
+    virus_level = 0
 
     for i in range(0, population):
         people.append(Npc())
@@ -323,12 +330,18 @@ def game_loop():
     )
     people.append(player)
     infected_people.append(Npc(virus=Virus.mutate()))
-
     game_exit = False
     while not game_exit:
+        display_width, display_height = pygame.display.get_surface().get_size()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 quit_game()
+            elif event.type == pygame.VIDEORESIZE:
+                print('resize')
+                screen = pygame.display.set_mode(
+                    event.dict['size'], pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.RESIZABLE)
+                print(event.dict['size'])
+                screen.blit(pygame.transform.scale(game_display, event.dict['size']), (0, 0))
 
         game_display.fill(black)
 
@@ -351,6 +364,7 @@ def game_loop():
             patient.animate()
         player.display_score()
         player.is_game_over()
+        # game_display.blit(pygame.transform.scale(game_display, (700, 700)), (0, 0))
         pygame.display.flip()
         clock.tick(120)
 
